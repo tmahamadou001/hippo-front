@@ -1,0 +1,418 @@
+<template>
+  <Teleport to="body">
+    <Transition name="modal">
+      <div
+        v-if="modelValue"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
+        @click.self="close"
+      >
+        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <!-- Header -->
+          <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">
+              {{ isEdit ? 'Modifier la réservation' : 'Nouvelle réservation' }}
+            </h2>
+            <button @click="close" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Timer (only for pending reservations) -->
+          <div v-if="isEdit && selectedReservation?.status === 'pending' && timeRemaining > 0" class="px-6 pt-4">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
+              <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-yellow-800">
+                  Temps restant : {{ formatTimeRemaining(timeRemaining) }}
+                </p>
+                <p class="text-xs text-yellow-600 mt-1">
+                  Cette réservation expirera automatiquement si elle n'est pas confirmée
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="isEdit && selectedReservation?.status === 'pending' && timeRemaining <= 0" class="px-6 pt-4">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-red-800">
+                  ⚠️ Cette réservation a expiré
+                </p>
+                <p class="text-xs text-red-600 mt-1">
+                  La place a été automatiquement libérée
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form -->
+          <form @submit.prevent="handleSubmit" class="p-6 space-y-4">
+            <!-- Départ -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Départ <span class="text-red-500">*</span>
+              </label>
+              <select
+                v-model="form.departure_id"
+                required
+                :disabled="isEdit"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 disabled:bg-gray-100"
+              >
+                <option value="">Sélectionner un départ</option>
+                <option v-for="departure in departures" :key="departure.id" :value="departure.id">
+                  {{ cityStore.getDisplayName(departure.line?.origin || '') }} → 
+                  {{ cityStore.getDisplayName(departure.line?.destination || '') }} - 
+                  {{ formatDate(departure.depart_at) }} à {{ departure.departure_time?.slice(0, 5) }}
+                  ({{ departure.seats_available }} places)
+                </option>
+              </select>
+            </div>
+
+            <!-- Informations passager -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Nom complet <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.passenger_name"
+                  type="text"
+                  required
+                  placeholder="Ex: Jean Kouassi"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Téléphone <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.passenger_phone"
+                  type="tel"
+                  required
+                  placeholder="+225 07 00 00 00"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Email (optionnel)
+              </label>
+              <input
+                v-model="form.passenger_email"
+                type="email"
+                placeholder="jean@example.com"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
+              />
+            </div>
+
+            <!-- Prix et Numéro de siège -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Prix (XOF) <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model.number="form.price"
+                  type="number"
+                  required
+                  min="0"
+                  placeholder="5000"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Numéro de siège (optionnel)
+                </label>
+                <input
+                  v-model="form.seat_number"
+                  type="text"
+                  placeholder="Ex: A12"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
+                />
+              </div>
+            </div>
+
+            <!-- Méthode de paiement -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Méthode de paiement
+              </label>
+              <select
+                v-model="form.payment_method"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
+              >
+                <option value="">Sélectionner</option>
+                <option value="Espèces">Espèces</option>
+                <option value="Mobile Money">Mobile Money</option>
+                <option value="Orange Money">Orange Money</option>
+                <option value="MTN Money">MTN Money</option>
+                <option value="Wave">Wave</option>
+                <option value="Carte bancaire">Carte bancaire</option>
+              </select>
+            </div>
+
+            <!-- Statuts (seulement en édition) -->
+            <div v-if="isEdit" class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Statut de la réservation
+                </label>
+                <select
+                  v-model="form.status"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
+                >
+                  <option value="pending">En attente</option>
+                  <option value="confirmed">Confirmée</option>
+                  <option value="cancelled">Annulée</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Statut du paiement
+                </label>
+                <select
+                  v-model="form.payment_status"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600"
+                >
+                  <option value="pending">En attente</option>
+                  <option value="paid">Payé</option>
+                  <option value="refunded">Remboursé</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                @click="close"
+                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                :disabled="loading"
+                class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                {{ loading ? 'Enregistrement...' : isEdit ? 'Modifier' : 'Créer' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, reactive, onMounted, onUnmounted } from 'vue'
+import reservationService from '@/services/reservationService'
+import departureService from '@/services/departureService'
+import type { Reservation, CreateReservationDto } from '@/types/reservation'
+import type { Departure } from '@/types/departure'
+import { useCityStore } from '@/stores/city'
+
+const props = defineProps<{
+  modelValue: boolean
+  reservation?: Reservation | null
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void
+  (e: 'saved'): void
+}>()
+
+const cityStore = useCityStore()
+const departures = ref<Departure[]>([])
+const loading = ref(false)
+const isEdit = ref(false)
+const selectedReservation = ref<Reservation | null>(null)
+const timeRemaining = ref(0)
+let timerInterval: NodeJS.Timeout | null = null
+
+const form = reactive<CreateReservationDto & { status?: string; payment_status?: string }>({
+  departure_id: '',
+  passenger_name: '',
+  passenger_phone: '',
+  passenger_email: '',
+  price: 0,
+  seat_number: '',
+  payment_method: '',
+  status: 'pending',
+  payment_status: 'pending'
+})
+
+const resetForm = () => {
+  form.departure_id = ''
+  form.passenger_name = ''
+  form.passenger_phone = ''
+  form.passenger_email = ''
+  form.price = 0
+  form.seat_number = ''
+  form.payment_method = ''
+  form.status = 'pending'
+  form.payment_status = 'pending'
+}
+
+const loadDepartures = async () => {
+  try {
+    const response = await departureService.getAll({ status: 'open' })
+    // Filter only future departures with available seats
+    departures.value = response.data.filter((d: Departure) => {
+      const departDate = new Date(d.depart_at)
+      const now = new Date()
+      return departDate > now && (d.seats_available === null || d.seats_available > 0)
+    })
+  } catch (error) {
+    console.error('Error loading departures:', error)
+  }
+}
+
+const close = () => {
+  emit('update:modelValue', false)
+  resetForm()
+}
+
+const handleSubmit = async () => {
+  loading.value = true
+  try {
+    if (isEdit.value && props.reservation) {
+      // Update
+      const updateData: any = {
+        passenger_name: form.passenger_name,
+        passenger_phone: form.passenger_phone,
+        passenger_email: form.passenger_email,
+        price: form.price,
+        seat_number: form.seat_number,
+        payment_method: form.payment_method,
+        status: form.status,
+        payment_status: form.payment_status
+      }
+      await reservationService.update(props.reservation.id, updateData)
+    } else {
+      // Create
+      const createData: CreateReservationDto = {
+        departure_id: form.departure_id,
+        passenger_name: form.passenger_name,
+        passenger_phone: form.passenger_phone,
+        passenger_email: form.passenger_email,
+        price: form.price,
+        seat_number: form.seat_number,
+        payment_method: form.payment_method
+      }
+      await reservationService.create(createData)
+    }
+    emit('saved')
+    close()
+  } catch (error: any) {
+    console.error('Error saving reservation:', error)
+    alert(error.response?.data?.message || 'Erreur lors de l\'enregistrement')
+  } finally {
+    loading.value = false
+  }
+}
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+const formatTimeRemaining = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${minutes}:${secs.toString().padStart(2, '0')}`
+}
+
+const startTimer = () => {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+  }
+
+  if (selectedReservation.value?.expires_at) {
+    const updateTimer = () => {
+      const expiresAt = new Date(selectedReservation.value!.expires_at!)
+      const now = new Date()
+      const diff = Math.floor((expiresAt.getTime() - now.getTime()) / 1000)
+      timeRemaining.value = Math.max(0, diff)
+
+      if (timeRemaining.value === 0 && timerInterval) {
+        clearInterval(timerInterval)
+      }
+    }
+
+    updateTimer()
+    timerInterval = setInterval(updateTimer, 1000)
+  }
+}
+
+const stopTimer = () => {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+  timeRemaining.value = 0
+}
+
+watch(() => props.modelValue, (newVal) => {
+  if (newVal) {
+    isEdit.value = !!props.reservation
+    selectedReservation.value = props.reservation || null
+    
+    if (props.reservation) {
+      form.departure_id = props.reservation.departure_id
+      form.passenger_name = props.reservation.passenger_name
+      form.passenger_phone = props.reservation.passenger_phone
+      form.passenger_email = props.reservation.passenger_email || ''
+      form.price = props.reservation.price
+      form.seat_number = props.reservation.seat_number || ''
+      form.payment_method = props.reservation.payment_method || ''
+      form.status = props.reservation.status
+      form.payment_status = props.reservation.payment_status
+
+      // Start timer if reservation is pending
+      if (props.reservation.status === 'pending' && props.reservation.expires_at) {
+        startTimer()
+      }
+    } else {
+      resetForm()
+      stopTimer()
+    }
+    loadDepartures()
+  } else {
+    stopTimer()
+  }
+})
+
+onMounted(async () => {
+  await cityStore.loadCities()
+})
+
+onUnmounted(() => {
+  stopTimer()
+})
+</script>
+
+<style scoped>
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+</style>

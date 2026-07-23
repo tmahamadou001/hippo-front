@@ -1,0 +1,41 @@
+{
+  "name": "geyavo-admin-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Interface d'administration pour les compagnies de transport - Geyavo",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+  },
+  "packageManager": "pnpm@10.19.0",
+  "dependencies": {
+    "@vueuse/core": "^11.2.0",
+    "ag-grid-community": "^34.3.1",
+    "ag-grid-vue3": "^34.3.1",
+    "apexcharts": "^5.3.6",
+    "axios": "^1.7.7",
+    "lucide-vue-next": "^0.454.0",
+    "pinia": "^2.2.6",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5",
+    "vue-toastification": "2.0.0-rc.5",
+    "vue3-apexcharts": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.6",
+    "@typescript-eslint/eslint-plugin": "^8.11.0",
+    "@typescript-eslint/parser": "^8.11.0",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.13.0",
+    "eslint-plugin-vue": "^9.29.1",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vue-tsc": "^2.1.10"
+  }
+}
