@@ -288,9 +288,9 @@ const handleSubmit = async () => {
     }
 
     if (isEdit.value && props.template) {
-      await seatTemplateService.update(props.template.id, data)
+      await seatTemplateService.update(props.template.id, data as any)
     } else {
-      await seatTemplateService.create(data)
+      await seatTemplateService.create(data as any)
     }
 
     emit('saved')

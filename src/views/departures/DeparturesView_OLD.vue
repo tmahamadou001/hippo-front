@@ -214,7 +214,7 @@ const departureToDelete = ref<Departure | null>(null)
 
 const filters = ref<DepartureFilters>({
   line_id: '',
-  status: '',
+  status: '' as any,
   date_from: '',
   date_to: ''
 })

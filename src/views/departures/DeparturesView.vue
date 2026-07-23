@@ -227,9 +227,9 @@ const fetchLines = async () => {
   }
 }
 
-const applyFilters = () => {
-  fetchDepartures()
-}
+// const applyFilters = () => {
+//   fetchDepartures()
+// }
 
 // AG Grid Events
 const onGridReady = (api: GridApi) => {

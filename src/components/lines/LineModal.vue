@@ -85,7 +85,7 @@
               </label>
               <div class="space-y-2">
                 <div
-                  v-for="(stop, index) in form.stops"
+                  v-for="(_, index) in form.stops"
                   :key="index"
                   class="flex gap-2"
                 >
