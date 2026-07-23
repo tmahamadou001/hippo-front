@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     component: LoginView,
-    beforeEnter: guestGuard as any,
+    beforeEnter: guestGuard,
     meta: { requiresAuth: false }
   },
 
@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: DashboardLayout,
     redirect: '/dashboard',
-    beforeEnter: authGuard as any,
+    beforeEnter: authGuard,
     children: [
       {
         path: 'dashboard',
