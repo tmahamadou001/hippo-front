@@ -143,7 +143,7 @@ const isGeyavo = computed(() => authStore.user?.role === 'geyavo')
 
 const filters = ref<DepartureFilters>({
   line_id: '',
-  status: '',
+  status: '' as any,
   date_from: '',
   date_to: ''
 })
@@ -171,7 +171,7 @@ const rowActions: ActionMenuItem[] = [
         await cancelDeparture(data)
       }
     },
-    condition: (data) => data.status === 'open'
+    // condition: (data) => data.status === 'open'
   },
   {
     label: 'Supprimer',

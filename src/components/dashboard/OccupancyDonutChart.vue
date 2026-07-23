@@ -8,7 +8,7 @@
       <apexchart
         type="donut"
         height="280"
-        :options="chartOptions"
+        :options="chartOptions as any"
         :series="series"
       />
     </div>

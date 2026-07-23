@@ -113,7 +113,6 @@ const currentYear = computed(() => {
 
 // Données simulées - à remplacer par de vraies données API
 const getDeparturesForDay = (date: Date): { count: number; occupancyRate: number } => {
-  const day = date.getDate()
   // Simulation: plus de départs en milieu de semaine
   const dayOfWeek = date.getDay()
   if (dayOfWeek === 0 || dayOfWeek === 6) {

@@ -200,7 +200,7 @@ class ActionsCellRenderer {
     
     // Calculer la hauteur estimée du menu
     const visibleActions = this.actions.filter(action => 
-      !action.condition || action.condition(this.data)
+      !(action as any).condition || (action as any).condition(this.data)
     )
     const estimatedMenuHeight = visibleActions.length * 44
     const spaceBelow = window.innerHeight - buttonRect.bottom
@@ -220,7 +220,7 @@ class ActionsCellRenderer {
     // Ajouter les actions
     this.actions.forEach((action) => {
       // Vérifier la condition si elle existe
-      if (action.condition && !action.condition(this.data)) {
+      if ((action as any).condition && !(action as any).condition(this.data)) {
         return
       }
 

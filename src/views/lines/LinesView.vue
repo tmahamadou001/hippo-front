@@ -109,7 +109,7 @@ const rowActions: ActionMenuItem[] = [
     onClick: async (data) => {
       await toggleLineStatus(data)
     },
-    condition: (data) => !data.is_active
+    // condition: (data) => !data.is_active
   },
   {
     label: 'Désactiver',
@@ -118,7 +118,7 @@ const rowActions: ActionMenuItem[] = [
     onClick: async (data) => {
       await toggleLineStatus(data)
     },
-    condition: (data) => data.is_active
+    // condition: (data) => data.is_active
   },
   {
     label: 'Supprimer',

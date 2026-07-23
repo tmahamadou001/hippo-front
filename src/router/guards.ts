@@ -11,7 +11,6 @@ import { usePermissionStore } from '@/stores/permissionStore'
  */
 export const authGuard = async (
   to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
   const authStore = useAuthStore()
@@ -48,8 +47,6 @@ export const authGuard = async (
  * Guest guard - Only for non-authenticated users
  */
 export const guestGuard = async (
-  to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
   next: NavigationGuardNext
 ) => {
   const authStore = useAuthStore()
@@ -83,7 +80,6 @@ export const guestGuard = async (
 export const roleGuard = (allowedRoles: string[]) => {
   return async (
     to: RouteLocationNormalized,
-    from: RouteLocationNormalized,
     next: NavigationGuardNext
   ) => {
     const authStore = useAuthStore()

@@ -24,7 +24,7 @@
     <apexchart
       type="area"
       height="280"
-      :options="chartOptions"
+      :options="chartOptions as any"
       :series="series"
     />
   </div>

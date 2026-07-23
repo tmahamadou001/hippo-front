@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     component: LoginView,
-    beforeEnter: guestGuard,
+    beforeEnter: guestGuard as any,
     meta: { requiresAuth: false }
   },
 
@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: DashboardLayout,
     redirect: '/dashboard',
-    beforeEnter: authGuard,
+    beforeEnter: authGuard as any,
     children: [
       {
         path: 'dashboard',
@@ -149,7 +149,7 @@ const router = createRouter({
 })
 
 // Global navigation guard
-router.beforeEach((to, _from, next) => {
+router.beforeEach((_, _from, next) => {
   const authStore = useAuthStore()
 
   // Initialize auth on first load

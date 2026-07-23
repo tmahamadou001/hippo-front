@@ -257,12 +257,12 @@ const markAllAsRead = () => {
 // Directive pour fermer au clic extérieur
 const vClickOutside = {
   mounted(el: HTMLElement, binding: any) {
-    el.clickOutsideEvent = (event: Event) => {
+    (el as any).clickOutsideEvent = (event: Event) => {
       if (!(el === event.target || el.contains(event.target as Node))) {
         binding.value()
       }
     }
-    document.addEventListener('click', el.clickOutsideEvent)
+    document.addEventListener('click', (el as any).clickOutsideEvent)
   },
   unmounted(el: HTMLElement & { clickOutsideEvent?: (event: Event) => void }) {
     if (el.clickOutsideEvent) {

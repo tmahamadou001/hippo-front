@@ -193,7 +193,7 @@
             Jours exclus (jours fériés, maintenance, etc.)
           </label>
           <div class="space-y-2">
-            <div v-for="(date, index) in formData.excluded_dates" :key="index" class="flex gap-2">
+            <div v-for="(_, index) in formData.excluded_dates" :key="index" class="flex gap-2">
               <input
                 v-model="formData.excluded_dates[index]"
                 type="date"

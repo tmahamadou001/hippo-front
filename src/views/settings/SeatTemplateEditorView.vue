@@ -272,7 +272,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import seatTemplateService, { type SeatMapTemplate } from '@/services/seatTemplateService'
+import seatTemplateService from '@/services/seatTemplateService'
 
 const router = useRouter()
 const route = useRoute()
@@ -377,9 +377,9 @@ const handleSave = async () => {
     }
 
     if (isEdit.value) {
-      await seatTemplateService.update(route.params.id as string, data)
+      await seatTemplateService.update(route.params.id as string, data as any)
     } else {
-      await seatTemplateService.create(data)
+      await seatTemplateService.create(data as any)
     }
 
     router.push('/settings?tab=templates')

@@ -258,8 +258,8 @@ watch(() => props.template, (template) => {
     form.value = {
       name: template.name,
       description: template.description,
-      layout: { ...template.layout },
-      metadata: { ...template.metadata }
+      layout: { ...template.layout } as any,
+      metadata: { ...template.metadata } as any
     }
     aisleAfterInput.value = template.layout.aisleAfter?.join(', ') || ''
   }

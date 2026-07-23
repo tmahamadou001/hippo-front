@@ -97,7 +97,7 @@ const rowActions: ActionMenuItem[] = [
     onClick: (data) => {
       editCompany(data)
     },
-    condition: (data) => data.slug !== 'geyavo_company'
+    // condition: (data: any) => (data.slug !== 'geyavo_company')
   },
   {
     label: 'Supprimer',
@@ -106,7 +106,7 @@ const rowActions: ActionMenuItem[] = [
     onClick: async (data) => {
       await deleteCompany(data)
     },
-    condition: (data) => data.slug !== 'geyavo_company'
+    // condition: (data) => data.slug !== 'geyavo_company'
   }
 ]
 

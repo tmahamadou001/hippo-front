@@ -90,7 +90,7 @@
                   class="flex gap-2"
                 >
                   <input
-                    v-model="form.stops[index]"
+                    v-model="(form.stops as any)[index]"
                     type="text"
                     placeholder="Ex: Bouaké"
                     class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-transparent"
@@ -296,7 +296,7 @@ const handleSubmit = async () => {
     if (props.line) {
       await lineService.update(props.line.id, data)
     } else {
-      await lineService.create(data)
+      await lineService.create(data as any)
     }
 
     emit('saved')

@@ -101,10 +101,10 @@ const rowActions: ActionMenuItem[] = [
     onClick: async (data) => {
       await impersonateUser(data)
     },
-    condition: (data) => {
-      // Visible uniquement pour Geyavo et pas pour impersonate un autre Geyavo
-      return isGeyavo.value && data.role !== 'geyavo'
-    }
+    // condition: (data: any) => {
+    //   // Visible uniquement pour Geyavo et pas pour impersonate un autre Geyavo
+    //   return isGeyavo.value && data.role !== 'geyavo'
+    // }
   },
   {
     label: 'Supprimer',
